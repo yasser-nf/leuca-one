@@ -49,6 +49,8 @@ Sans variables d’environnement, l’app redirige vers `/setup` avec les instru
 
 ## Déploiement Vercel
 
+Guide détaillé : [docs/vercel-deploy.md](./docs/vercel-deploy.md).
+
 1. Importer le repo GitHub.
 2. Ajouter les mêmes variables d’environnement.
 3. Deploy. Créer les 2 utilisateurs dans Supabase Auth.
