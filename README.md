@@ -50,6 +50,7 @@ Sans variables d’environnement, l’app redirige vers `/setup` avec les instru
 ## Déploiement Vercel
 
 Guide détaillé : [docs/vercel-deploy.md](./docs/vercel-deploy.md).
+Checklist urgence NOT_FOUND : [docs/vercel-checklist-yasser.md](./docs/vercel-checklist-yasser.md).
 
 1. Importer le repo GitHub.
 2. Ajouter les mêmes variables d’environnement.
