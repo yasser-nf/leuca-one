@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { SignedImage } from "@/components/signed-image";
 import { PriceCnyDzd } from "@/components/price-display";
 import { createClient } from "@/lib/supabase/server";
-import { getFxRate } from "@/lib/settings";
+import { getFxRates } from "@/lib/settings";
 import { formatUsd } from "@/lib/currency";
 import type { Product, ProductStock, StockMovement } from "@/lib/types/database";
 import { ArchiveProductButton } from "@/components/products/archive-button";
@@ -19,7 +19,7 @@ export default async function ProductDetailPage({
   params: { id: string };
 }) {
   const supabase = createClient();
-  const rate = await getFxRate();
+  const rates = await getFxRates();
 
   const { data: product } = await supabase
     .from("products")
@@ -90,12 +90,12 @@ export default async function ProductDetailPage({
           <div>
             <dt className="text-muted-foreground">Prix achat</dt>
             <dd>
-              <PriceCnyDzd cny={Number(p.unit_price_cny)} rate={rate} />
+              <PriceCnyDzd cny={Number(p.unit_price_cny)} rates={rates} />
             </dd>
           </div>
           {p.unit_price_usd != null ? (
             <div>
-              <dt className="text-muted-foreground">USD (info)</dt>
+              <dt className="text-muted-foreground">USD catalogue</dt>
               <dd>{formatUsd(Number(p.unit_price_usd))}</dd>
             </div>
           ) : null}

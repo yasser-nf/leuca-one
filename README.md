@@ -10,7 +10,7 @@ Stack : Next.js 14 (App Router) + TypeScript + Tailwind + shadcn/ui + Supabase.
 - Modèles + photos (compression client ≤1600 px / ~300 Ko)
 - Mouvements de stock + vue `product_stock`
 - Tableau de bord (valeur stock = prix CNY × taux settings)
-- Paramètres : taux **CNY→DZD** uniquement (USD affichage optionnel)
+- Paramètres : taux **CNY→DZD** + **CNY→USD** (DZD→USD dérivé) ; prix affichés CNY · DZD · USD
 - Import CSV (template fourni ; pas de fichier métier encore)
 
 **Hors V1 :** commandes, expéditions, coût de revient, OCR, sync ventes, catalogue public.

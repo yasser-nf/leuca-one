@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { SignedImage } from "@/components/signed-image";
 import { PriceCnyDzd } from "@/components/price-display";
 import { createClient } from "@/lib/supabase/server";
-import { getFxRate } from "@/lib/settings";
+import { getFxRates } from "@/lib/settings";
 import type { Product, ProductStock } from "@/lib/types/database";
 import { ProductFilters } from "@/components/products/product-filters";
 
@@ -26,7 +26,7 @@ export default async function ProductsPage({
   };
 }) {
   const supabase = createClient();
-  const rate = await getFxRate();
+  const rates = await getFxRates();
 
   let query = supabase
     .from("products")
@@ -119,7 +119,7 @@ export default async function ProductsPage({
                   <p className="text-[11px] text-muted-foreground">{p.sku}</p>
                   <PriceCnyDzd
                     cny={Number(p.unit_price_cny)}
-                    rate={rate}
+                    rates={rates}
                     className="block text-xs"
                   />
                 </div>

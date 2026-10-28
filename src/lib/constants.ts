@@ -64,6 +64,11 @@ export const STOCK_OUTBOUND_TYPES: StockMovementType[] = [
 export const STOCK_INBOUND_TYPES: StockMovementType[] = ["Entrée", "Retour"];
 
 export const DEFAULT_FX_CNY_DZD = 27.5;
+/** Approx. market default until Yasser sets the real rate in /settings */
+export const DEFAULT_FX_CNY_USD = 0.14;
+
+export const FX_SETTING_CNY_DZD = "exchange_rate_cny_dzd";
+export const FX_SETTING_CNY_USD = "exchange_rate_cny_usd";
 
 /** CSV template columns for product import */
 export const CSV_PRODUCT_COLUMNS = [

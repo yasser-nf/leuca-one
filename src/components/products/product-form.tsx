@@ -40,15 +40,19 @@ export function ProductForm({
   product,
   suppliers,
   fxRate,
+  fxRates,
   defaultSupplierId,
   duplicateFrom,
 }: {
   product?: Product;
   suppliers: Pick<Supplier, "id" | "name">[];
-  fxRate: number;
+  /** @deprecated use fxRates */
+  fxRate?: number;
+  fxRates?: import("@/lib/currency").FxRates;
   defaultSupplierId?: string;
   duplicateFrom?: Product;
 }) {
+  const rates = fxRates ?? (fxRate != null ? { cnyDzd: fxRate, cnyUsd: 0 } : undefined);
   const router = useRouter();
   const base = product ?? duplicateFrom;
   const [loading, setLoading] = useState(false);
@@ -421,14 +425,14 @@ export function ProductForm({
             value={priceCny || ""}
             onChange={(e) => setPriceCny(Number(e.target.value))}
           />
-          {priceCny > 0 ? (
+          {priceCny > 0 && rates ? (
             <p className="text-xs text-muted-foreground">
-              <PriceCnyDzd cny={priceCny} rate={fxRate} />
+              <PriceCnyDzd cny={priceCny} rates={rates} />
             </p>
           ) : null}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="unit_price_usd">Prix USD (optionnel)</Label>
+          <Label htmlFor="unit_price_usd">Prix USD catalogue (optionnel)</Label>
           <Input
             id="unit_price_usd"
             name="unit_price_usd"
@@ -437,6 +441,10 @@ export function ProductForm({
             min="0"
             defaultValue={base?.unit_price_usd ?? ""}
           />
+          <p className="text-[11px] text-muted-foreground">
+            Champ libre fournisseur. La conversion automatique utilise le taux
+            CNY→USD des paramètres.
+          </p>
         </div>
         <div className="space-y-2">
           <Label htmlFor="unit_weight_g">Poids g *</Label>

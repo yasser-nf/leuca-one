@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SignedImage } from "@/components/signed-image";
 import { createClient } from "@/lib/supabase/server";
-import { getFxRate } from "@/lib/settings";
+import { getFxRates } from "@/lib/settings";
 import { PriceCnyDzd } from "@/components/price-display";
 import type { Product, Supplier } from "@/lib/types/database";
 import { ArchiveSupplierButton } from "@/components/suppliers/archive-button";
@@ -18,7 +18,7 @@ export default async function SupplierDetailPage({
   params: { id: string };
 }) {
   const supabase = createClient();
-  const rate = await getFxRate();
+  const rates = await getFxRates();
 
   const { data: supplier } = await supabase
     .from("suppliers")
@@ -139,7 +139,7 @@ export default async function SupplierDetailPage({
                     <p className="truncate text-sm font-medium">{p.name}</p>
                     <p className="text-xs text-muted-foreground">{p.sku}</p>
                   </div>
-                  <PriceCnyDzd cny={Number(p.unit_price_cny)} rate={rate} className="text-xs" />
+                  <PriceCnyDzd cny={Number(p.unit_price_cny)} rates={rates} className="text-xs" />
                 </Link>
               </li>
             ))}

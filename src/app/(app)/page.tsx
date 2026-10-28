@@ -4,15 +4,16 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/server";
-import { getFxRate } from "@/lib/settings";
-import { cnyToDzd, formatDzd } from "@/lib/currency";
+import { getFxRates } from "@/lib/settings";
+import { cnyToDzd, dzdToUsd, formatDzd, formatUsd } from "@/lib/currency";
 import type { Product, ProductStock } from "@/lib/types/database";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const supabase = createClient();
-  const rate = await getFxRate();
+  const rates = await getFxRates();
+  const rate = rates.cnyDzd;
 
   const [
     { count: productCount },
@@ -91,7 +92,7 @@ export default async function DashboardPage() {
     <div>
       <PageHeader
         title="Tableau de bord"
-        subtitle={`Taux CNY→DZD : ${rate}`}
+        subtitle={`CNY→DZD ${rates.cnyDzd} · CNY→USD ${rates.cnyUsd}`}
       />
 
       <div className="grid grid-cols-3 gap-2">
@@ -120,6 +121,9 @@ export default async function DashboardPage() {
         <CardContent className="pb-4">
           <p className="text-2xl font-semibold tabular-nums">
             {formatDzd(stockValueDzd)}
+          </p>
+          <p className="mt-0.5 text-sm text-muted-foreground tabular-nums">
+            ≈ {formatUsd(dzdToUsd(stockValueDzd, rates))}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
             Prix d&apos;achat CNY × taux settings (frais non inclus — V2).
