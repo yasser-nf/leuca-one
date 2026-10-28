@@ -1,66 +1,83 @@
 # Déployer Leuca Sourcing sur Vercel
 
-App Next.js 14 (App Router) — prête pour Vercel. Les secrets restent dans le dashboard Vercel, **jamais** dans le repo.
+App Next.js 14 (App Router) — `npm run build` OK sur la branche V1. Secrets uniquement dans le dashboard Vercel.
 
 ## Variables d’environnement (obligatoires)
 
 | Name | Value |
 |------|--------|
-| `NEXT_PUBLIC_SUPABASE_URL` | URL du projet Supabase (`https://….supabase.co`) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clé **anon** (publique) Supabase |
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://YOUR_PROJECT.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | clé **anon** Supabase |
 
-Optionnel (scripts admin seulement, **ne pas** exposer au client) : `SUPABASE_SERVICE_ROLE_KEY`.
+À définir pour **Preview** et **Production**. Redeploy après les avoir ajoutées.
 
-## Option A — Dashboard Vercel (recommandé)
+---
 
-1. Aller sur [vercel.com](https://vercel.com) → **Add New…** → **Project**.
-2. **Import** le repo GitHub **`yasser-nf/leuca-one`** (autoriser GitHub si demandé).
-3. **Configure Project**
-   - Framework Preset : **Next.js** (auto)
-   - Root Directory : `.` (racine)
-   - Build Command : `npm run build` (défaut)
-   - Output : laisser le défaut Next.js
-4. **Branch**
-   - Pour tester la V1 tout de suite : déployer depuis la branche PR  
-     `cursor/v1-catalogue-stock-mvp-bc6d`  
-     (dans *Git* → Production Branch, ou créer un Deployment depuis cette branche).
-   - Pour la prod stable : merger la PR [#1](https://github.com/yasser-nf/leuca-one/pull/1) dans `main`, puis Production Branch = `main`.
-5. **Environment Variables** → Add pour **Production** (et Preview si tu veux) :
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`  
-   Coller les mêmes valeurs que dans `.env.local` local.
-6. **Deploy**.
-7. Ouvrir l’URL `https://….vercel.app` → `/login`.
+## 404 / « NOT_FOUND » sur l’URL preview — cause réelle
 
-### Après le premier deploy
+Le déploiement Git de la branche PR **a réussi** (`Vercel – leuca-stock` = success).
 
-- Auth : les 2 comptes associés doivent déjà exister dans Supabase Auth.
-- Migrations SQL déjà appliquées (001→005) sur ce projet Supabase.
-- Domaine custom (optionnel) : Project → Settings → Domains.
+L’URL preview du type :
 
-## Option B — CLI (si installée chez toi)
+`https://leuca-stock-git-cursor-v1-catalogue-stock-mvp-bc6d-mahfazati.vercel.app`
 
-```bash
-npm i -g vercel
-vercel login
-cd leuca-one
-vercel link          # lier au projet
-vercel env add NEXT_PUBLIC_SUPABASE_URL production
-vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY production
-vercel --prod        # ou vercel (preview)
-```
+répond **302 → Vercel Authentication (SSO)**, pas une erreur Next.js. Sans session Vercel (compte du projet `mahfazati`), le navigateur peut afficher une page plateforme **404 NOT_FOUND**.
 
-Sur la machine cloud Cursor : **pas de CLI Vercel authentifiée** — faire Option A.
+Ce n’est **pas** :
+- un `main` vide
+- un bug `basePath` / middleware / App Router
+- un mauvais Root Directory (le build Next a bien tourné)
 
-## Checklist si la page blanche / erreur
+### Fix immédiat (dashboard — 30 s)
 
-1. Variables bien présentes sur l’environnement **Production** (pas seulement Preview).
-2. Redeploy après ajout des env (`Deployments` → ⋯ → Redeploy).
-3. Console navigateur : erreurs Supabase → vérifier URL/clé et RLS/migrations.
-4. Build local : `npm run build` doit passer (vérifié sur la branche V1).
+1. Ouvre [vercel.com](https://vercel.com) → projet **`leuca-stock`** (équipe/compte **mahfazati**).
+2. **Settings → Deployment Protection** (parfois sous *Security*).
+3. Pour **Preview** : mets la protection sur **None** / désactive **Vercel Authentication**  
+   (ou « Only Preview Deployments » → off).
+4. **Sauve**. Pas besoin de redeploy du code : recharge l’URL preview (ou ouvre-la via **Deployments → Visit** pendant que tu es connecté à Vercel).
+
+**Contournement sans changer les settings :**  
+Deployments → clic sur le dernier deploy de `cursor/v1-catalogue-stock-mvp-bc6d` → bouton **Visit** / **Open** (ajoute un cookie SSO). Tu dois être loggé sur le bon compte Vercel.
+
+### `leuca-stock.vercel.app` = NOT_FOUND
+
+Normal tant qu’il n’y a **pas de déploiement Production**. `main` n’a encore que le stub README. Options :
+
+- **A.** Merger la PR [#1](https://github.com/yasser-nf/leuca-one/pull/1) dans `main` → Production Branch = `main` → redeploy Production  
+- **B.** Temporairement : Settings → Git → **Production Branch** = `cursor/v1-catalogue-stock-mvp-bc6d`, puis Redeploy Production
+
+---
+
+## Premier import (si pas déjà fait)
+
+1. **Add New → Project** → import **`yasser-nf/leuca-one`**
+2. Framework : **Next.js** · Root Directory : **`.`** (racine) · Output : défaut (ne pas mettre `out` / `dist`)
+3. Env : les 2 variables ci-dessus (Preview + Production)
+4. Deploy
+
+## Après accès OK
+
+1. Ouvre `/login`
+2. Comptes associés déjà créés dans Supabase Auth
+3. Migrations `001`→`005` déjà appliquées
+
+## Merge readiness
+
+- Branche PR prête à merger pour la prod.
+- Après merge : Production Branch = `main`, env Production renseignées, un redeploy Production.
+- Désactiver Deployment Protection sur Preview (ou Production si tu veux un accès public sans login Vercel) — l’app a déjà son propre login Supabase.
+
+## Checklist debug
+
+| Symptôme | Action |
+|----------|--------|
+| 404 `x-vercel-error: NOT_FOUND` sur preview | Désactiver Vercel Authentication / ouvrir via Dashboard Visit |
+| 404 sur `*.vercel.app` production | Pas de deploy Production — merger ou changer Production Branch |
+| Login /setup « variables manquantes » | Ajouter env Preview+Production puis Redeploy |
+| Build failed | Voir logs ; localement `npm run build` |
 
 ## Liens
 
 - Repo : https://github.com/yasser-nf/leuca-one  
 - PR V1 : https://github.com/yasser-nf/leuca-one/pull/1  
-- Env exemple (placeholders) : `.env.example` dans le repo  
+- Déploiement réussi (exemple) : voir check « Vercel – leuca-stock » sur la PR  
